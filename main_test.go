@@ -8,7 +8,7 @@ import (
 )
 
 func TestGenKey(t *testing.T) {
-	hn := "NewLabel"
+	hn := "DNhM2MzTYz"
 	aeskey := "HIgtcdRUxqT72582"
 	baes, _ := letsgo.EncryptAES([]byte(hn), []byte(aeskey))
 	ser := hex.EncodeToString(baes)[7:17]

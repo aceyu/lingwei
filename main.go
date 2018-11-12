@@ -5,32 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"keybd_event"
+	"os"
+
 	"lingwei/letsgo"
 	"strconv"
-	"sync"
 	"time"
 )
 
 const (
 	aeskey = "HIgtcdRUxqT72582"
 )
-
-type configeration struct {
-	Round     int     `json:"round"`
-	StartX    int     `json:"startX"`
-	StartY    int     `json:"startY"`
-	Rmin      int     `json:"rmin"`
-	Rmax      int     `json:"rmax"`
-	Gmin      int     `json:"gmin"`
-	Gmax      int     `json:"gmax"`
-	Bmin      int     `json:"bmin"`
-	Bmax      int     `json:"bmax"`
-	RoundTime float32 `json:"roundTime"`
-	Waiting   int     `json:"waiting"`
-	Interval  int     `json:"interval"`
-	Key       string  `json:"key"`
-}
 
 func main() {
 	fmt.Println("=======================================")
@@ -63,10 +47,22 @@ func main() {
 	if mySeria != config.Key {
 		fmt.Println("机器码：" + hn)
 		fmt.Println("序列号错误，请联系作者获取。")
-		fmt.Println("获取后，请用记事本打开config.ini，将倒数第二行的thisismykey替换为真正的序列号")
-		fmt.Println("按任意键退出...")
-		fmt.Scanln(&anykey)
-		return
+		fmt.Print("请输入新的序列号：")
+		var newSeria string
+		fmt.Scanln(&newSeria)
+		if newSeria == mySeria {
+			config.Key = newSeria
+			err := saveConfig(config)
+			if err != nil {
+				fmt.Println("更新序列号失败...")
+			} else {
+				fmt.Println("更新序列号成功...")
+			}
+		} else {
+			fmt.Println("序列号错误，按任意键退出...")
+			fmt.Scanln(&anykey)
+			return
+		}
 	}
 
 	fmt.Println("使用说明：")
@@ -82,44 +78,47 @@ func main() {
 	timesstr := ""
 	fmt.Scanln(&timesstr)
 	times, _ := strconv.Atoi(timesstr)
-	if times == 0 {
+	if times <= 0 {
 		fmt.Println("无限次数，点击任意键开始...")
 	} else {
 		fmt.Println("执行" + timesstr + "次，点击任意键开始...")
 	}
-
 	fmt.Scanln(&anykey)
-	fmt.Println("Enjoy!")
-	time.Sleep(10 * time.Second)
-	kb, err := keybd_event.NewKeyBonding()
-	if err != nil {
-		panic(err)
-	}
-	kb.SetKeys(keybd_event.VK_A)
-	err = kb.Launching()
-	kb.Launching()
-	kb.Launching()
-	kb.Launching()
-	if err != nil {
-		panic(err)
-	}
 
-	var lock *sync.Mutex = new(sync.Mutex)
-	lock.Lock()
-	defer lock.Unlock()
+	fish := letsgo.NewFish(*config, times)
+	fmt.Println("3")
+	time.Sleep(1 * time.Second)
+	fmt.Println("2")
+	time.Sleep(1 * time.Second)
+	fmt.Println("1")
+	time.Sleep(1 * time.Second)
+	fmt.Println("Enjoy!")
+	fish.Launch()
 	fmt.Println("按任意键退出...")
 	fmt.Scanln(&anykey)
 }
 
-func parseConfig() (*configeration, error) {
+func parseConfig() (*letsgo.Configeration, error) {
 	b, err := ioutil.ReadFile("./config.ini")
 	if err != nil {
 		return nil, err
 	}
-	var con configeration
+	var con letsgo.Configeration
 	err = json.Unmarshal(b, &con)
 	if err != nil {
 		return nil, err
 	}
 	return &con, nil
+}
+
+func saveConfig(config *letsgo.Configeration) error {
+	jb, err := json.MarshalIndent(config, "", "	")
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile("config.ini", jb, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	return nil
 }
