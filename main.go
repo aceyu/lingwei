@@ -8,6 +8,7 @@ import (
 	"keybd_event"
 	"lingwei/letsgo"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -102,6 +103,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	var lock *sync.Mutex = new(sync.Mutex)
+	lock.Lock()
+	defer lock.Unlock()
 	fmt.Println("按任意键退出...")
 	fmt.Scanln(&anykey)
 }
