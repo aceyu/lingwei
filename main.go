@@ -68,7 +68,7 @@ func main() {
 	fmt.Println("使用说明：")
 	fmt.Println("")
 	fmt.Println("1. 设置屏幕分辨率为1920 x 1080")
-	fmt.Println("2. 游戏显示设置为全屏，中等画质，界面缩放1.0")
+	fmt.Println("2. 游戏显示设置为全屏，标准画质，界面缩放1.0")
 	fmt.Println("3. 确保包裹有足够空间，鱼饵充足")
 	fmt.Println("4. 找一处有水的地方，进入钓鱼模式，装上鱼饵")
 	fmt.Println("5. 点击开始，在3秒内切换回游戏")
