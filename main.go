@@ -3,12 +3,15 @@ package main
 import (
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
+	"keybd_event"
 	"lingwei/letsgo"
 	"os"
+	"time"
 
 	"github.com/andlabs/ui"
+
+	_ "github.com/andlabs/ui/winmanifest"
 )
 
 const (
@@ -43,7 +46,6 @@ func main() {
 			showError("无法获取配置信息")
 			return
 		}
-		fmt.Println(config)
 
 		window := ui.NewWindow("IG牛逼", 600, 280, true)
 		vbox := ui.NewVerticalBox()
@@ -89,7 +91,21 @@ func main() {
 			}
 			mySeria := hex.EncodeToString(baes)[7:17]
 			if mySeria == config.Key {
-				//TODO
+				go func() {
+					time.Sleep(10 * time.Second)
+					kb, err := keybd_event.NewKeyBonding()
+					if err != nil {
+						panic(err)
+					}
+					kb.SetKeys(keybd_event.VK_A)
+					err = kb.Launching()
+					kb.Launching()
+					kb.Launching()
+					kb.Launching()
+					if err != nil {
+						panic(err)
+					}
+				}()
 			} else {
 				ui.MsgBox(window, "错误", "序列号错误，请联系作者获取。")
 			}

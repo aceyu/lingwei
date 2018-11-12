@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"image"
 	"image/png"
+	"keybd_event"
 	"math"
 	"os"
 	"time"
-
-	"github.com/go-vgo/robotgo"
 )
 
 var rmin, rmax, gmin, gmax, bmin, bmax = 240, 250, 230, 240, 128, 138
@@ -22,9 +21,15 @@ func main1() {
 	startY := 308
 	roundTime := 2.0
 	time.Sleep(10 * time.Second)
-
-	robotgo.KeyTap("q")
-
+	kb, err := keybd_event.NewKeyBonding()
+	if err != nil {
+		panic(err)
+	}
+	kb.SetKeys(keybd_event.VK_Q)
+	err = kb.Launching()
+	if err != nil {
+		panic(err)
+	}
 	// r := image.Rect(50, 50, 500, 500)
 	// img, err := screenshot.CaptureRect(r)
 
