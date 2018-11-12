@@ -76,8 +76,8 @@ func (this *Fish) Launch() {
 
 func (this *Fish) fish() {
 	fmt.Println("开始钓鱼...")
-	var find *bool
-	*find = false
+	ft := false
+	find := &ft
 	this.kb.Launching()
 	time.Sleep(time.Duration(this.config.SpellTime) * time.Second)
 

@@ -50,19 +50,19 @@ func main() {
 		fmt.Print("请输入新的序列号：")
 		var newSeria string
 		fmt.Scanln(&newSeria)
-		if newSeria == mySeria {
-			config.Key = newSeria
-			err := saveConfig(config)
-			if err != nil {
-				fmt.Println("更新序列号失败...")
-			} else {
-				fmt.Println("更新序列号成功...")
-			}
-		} else {
-			fmt.Println("序列号错误，按任意键退出...")
-			fmt.Scanln(&anykey)
-			return
-		}
+		// if newSeria == mySeria {
+		// 	config.Key = newSeria
+		// 	err := saveConfig(config)
+		// 	if err != nil {
+		// 		fmt.Println("更新序列号失败...")
+		// 	} else {
+		// 		fmt.Println("更新序列号成功...")
+		// 	}
+		// } else {
+		// 	fmt.Println("序列号错误，按任意键退出...")
+		// 	fmt.Scanln(&anykey)
+		// 	return
+		// }
 	}
 
 	fmt.Println("使用说明：")
