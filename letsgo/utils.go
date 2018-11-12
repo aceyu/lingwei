@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"net"
+	"os"
 )
 
 func GetHardwareNo() string {
@@ -22,8 +23,13 @@ func GetHardwareNo() string {
 		}
 	}
 	if hardwareAddr != "" {
-		hn := base64.StdEncoding.EncodeToString([]byte(hex.EncodeToString([]byte(hardwareAddr + "313a61643a"))))
-		hn = hn[5:15]
+		hostname, _ := os.Hostname()
+		hn := base64.StdEncoding.EncodeToString([]byte(hex.EncodeToString([]byte(hardwareAddr + "313a61643a" + hostname))))
+		if len(hn) > 67 {
+			hn = hn[5:8] + hn[62:66] + hn[len(hn)-3:len(hn)]
+		} else {
+			hn = hn[5:12] + hn[len(hn)-3:len(hn)]
+		}
 		return hn
 	}
 	return ""

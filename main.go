@@ -3,15 +3,12 @@ package main
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"keybd_event"
 	"lingwei/letsgo"
-	"os"
+	"strconv"
 	"time"
-
-	"github.com/andlabs/ui"
-
-	_ "github.com/andlabs/ui/winmanifest"
 )
 
 const (
@@ -35,112 +32,82 @@ type configeration struct {
 }
 
 func main() {
+	fmt.Println("=======================================")
+	fmt.Println("==                                   ==")
+	fmt.Println("==               Welcome             ==")
+	fmt.Println("==                                   ==")
+	fmt.Println("=======================================")
+	anykey := ""
 	hn := letsgo.GetHardwareNo()
+	if hn == "" {
+		fmt.Println("无法获取机器码，按任意键退出...")
+		fmt.Scanln(&anykey)
+		return
+
+	}
 	config, err := parseConfig()
-	err = ui.Main(func() {
-		if hn == "" {
-			showError("无法获取机器码")
-			return
-		}
-		if err != nil {
-			showError("无法获取配置信息")
-			return
-		}
+	if err != nil {
+		fmt.Println("无法获取配置信息，按任意键退出...")
+		fmt.Scanln(&anykey)
+		return
+	}
 
-		window := ui.NewWindow("IG牛逼", 600, 280, true)
-		vbox := ui.NewVerticalBox()
+	baes, err := letsgo.EncryptAES([]byte(hn), []byte(aeskey))
+	mySeria := hex.EncodeToString(baes)[7:17]
+	if err != nil {
+		fmt.Println("序列号错误，按任意键退出...")
+		fmt.Scanln(&anykey)
+		return
+	}
+	if mySeria != config.Key {
+		fmt.Println("机器码：" + hn)
+		fmt.Println("序列号错误，请联系作者获取。")
+		fmt.Println("获取后，请用记事本打开config.ini，将倒数第二行的thisismykey替换为真正的序列号")
+		fmt.Println("按任意键退出...")
+		fmt.Scanln(&anykey)
+		return
+	}
 
-		vbox.SetPadded(true)
+	fmt.Println("使用说明：")
+	fmt.Println("")
+	fmt.Println("1. 设置屏幕分辨率为1920 x 1080")
+	fmt.Println("2. 游戏显示设置为全屏，中等画质，界面缩放1.0")
+	fmt.Println("3. 确保包裹有足够空间，鱼饵充足")
+	fmt.Println("4. 找一处有水的地方，进入钓鱼模式，装上鱼饵")
+	fmt.Println("5. 点击开始，在3秒内切换回游戏")
+	fmt.Println("6. 挂机别动鼠标键盘，别切换窗口，可关显示器")
+	fmt.Println("")
+	fmt.Print("设置钓鱼次数（直接回车表示无限次）：")
+	timesstr := ""
+	fmt.Scanln(&timesstr)
+	times, _ := strconv.Atoi(timesstr)
+	if times == 0 {
+		fmt.Println("无限次数，点击任意键开始...")
+	} else {
+		fmt.Println("执行" + timesstr + "次，点击任意键开始...")
+	}
 
-		hbox := ui.NewHorizontalBox()
-		hbox.SetPadded(true)
-		vbox.Append(hbox, false)
-		vbox.Append(ui.NewLabel("机器号："+hn), false)
-		serialForm := ui.NewForm()
-		serialForm.SetPadded(true)
-		serialEntry := ui.NewEntry()
-		if config.Key != "" {
-			serialEntry.SetText(config.Key)
-		}
-		serialForm.Append("序列号", serialEntry, false)
-		hbox.Append(serialForm, false)
-
-		btnSer := ui.NewButton("设置序列号")
-		btnSer.OnClicked(func(*ui.Button) {
-			config.Key = serialEntry.Text()
-			err := saveConfig(config)
-			if err != nil {
-				ui.MsgBox(window, "错误", "设置序列号失败："+err.Error())
-			} else {
-				ui.MsgBox(window, "提示", "设置序列号成功")
-			}
-		})
-
-		hbox.Append(btnSer, false)
-		vbox.Append(ui.NewLabel("使用说明："), false)
-		vbox.Append(ui.NewLabel("1. 先设置屏幕分辨率为1920 x 1080"), false)
-		vbox.Append(ui.NewLabel("2. 游戏显示设置为全屏，中等画质，界面缩放1.0"), false)
-		vbox.Append(ui.NewLabel("3. 找一处有水的地方，进入钓鱼模式，装上鱼饵"), false)
-		vbox.Append(ui.NewLabel("4. 点击开始，在3秒内切换回游戏"), false)
-		vbox.Append(ui.NewLabel("5. 挂机别动鼠标键盘，别切换窗口，可关显示器。Enjoy!"), false)
-		btnStart := ui.NewButton("开始")
-		btnStart.OnClicked(func(*ui.Button) {
-			baes, err := letsgo.EncryptAES([]byte(hn), []byte(aeskey))
-			if err != nil {
-				ui.MsgBox(window, "错误", "序列号错误："+err.Error())
-			}
-			mySeria := hex.EncodeToString(baes)[7:17]
-			if mySeria == config.Key {
-				go func() {
-					time.Sleep(10 * time.Second)
-					kb, err := keybd_event.NewKeyBonding()
-					if err != nil {
-						panic(err)
-					}
-					kb.SetKeys(keybd_event.VK_A)
-					err = kb.Launching()
-					kb.Launching()
-					kb.Launching()
-					kb.Launching()
-					if err != nil {
-						panic(err)
-					}
-				}()
-			} else {
-				ui.MsgBox(window, "错误", "序列号错误，请联系作者获取。")
-			}
-		})
-
-		vbox.Append(btnStart, false)
-
-		window.SetChild(vbox)
-
-		window.OnClosing(func(*ui.Window) bool {
-			ui.Quit()
-			return true
-		})
-		window.SetMargined(true)
-		window.Show()
-	})
+	fmt.Scanln(&anykey)
+	fmt.Println("Enjoy!")
+	time.Sleep(10 * time.Second)
+	kb, err := keybd_event.NewKeyBonding()
 	if err != nil {
 		panic(err)
 	}
-}
-
-func saveConfig(config *configeration) error {
-	jb, err := json.MarshalIndent(config, "", "	")
+	kb.SetKeys(keybd_event.VK_A)
+	err = kb.Launching()
+	kb.Launching()
+	kb.Launching()
+	kb.Launching()
 	if err != nil {
-		return err
+		panic(err)
 	}
-	err = ioutil.WriteFile("config.ini", jb, os.ModePerm)
-	if err != nil {
-		return err
-	}
-	return nil
+	fmt.Println("按任意键退出...")
+	fmt.Scanln(&anykey)
 }
 
 func parseConfig() (*configeration, error) {
-	b, err := ioutil.ReadFile("config.ini")
+	b, err := ioutil.ReadFile("./config.ini")
 	if err != nil {
 		return nil, err
 	}
@@ -150,22 +117,4 @@ func parseConfig() (*configeration, error) {
 		return nil, err
 	}
 	return &con, nil
-}
-
-func showError(msg string) {
-	w := ui.NewWindow("错误", 100, 100, true)
-	v := ui.NewVerticalBox()
-	v.Append(ui.NewLabel(msg), false)
-	b := ui.NewButton("关闭")
-	v.Append(b, false)
-	b.OnClicked(func(*ui.Button) {
-		ui.Quit()
-	})
-	w.SetChild(v)
-	w.OnClosing(func(*ui.Window) bool {
-		ui.Quit()
-		return true
-	})
-	w.SetMargined(true)
-	w.Show()
 }
