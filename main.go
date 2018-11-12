@@ -1,97 +1,155 @@
 package main
 
 import (
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
-	"image"
-	"image/png"
-	"math"
+	"io/ioutil"
+	"lingwei/letsgo"
 	"os"
-	"time"
 
-	"github.com/go-vgo/robotgo"
+	"github.com/andlabs/ui"
 )
-
-var rmin, rmax, gmin, gmax, bmin, bmax = 240, 250, 230, 240, 128, 138
 
 const (
-	r = 70
+	aeskey = "HIgtcdRUxqT72582"
 )
 
+type configeration struct {
+	Round     int     `json:"round"`
+	StartX    int     `json:"startX"`
+	StartY    int     `json:"startY"`
+	Rmin      int     `json:"rmin"`
+	Rmax      int     `json:"rmax"`
+	Gmin      int     `json:"gmin"`
+	Gmax      int     `json:"gmax"`
+	Bmin      int     `json:"bmin"`
+	Bmax      int     `json:"bmax"`
+	RoundTime float32 `json:"roundTime"`
+	Waiting   int     `json:"waiting"`
+	Interval  int     `json:"interval"`
+	Key       string  `json:"key"`
+}
+
 func main() {
-	startX := 580
-	startY := 308
-	roundTime := 2.0
-	time.Sleep(10 * time.Second)
-
-	robotgo.KeyTap("q")
-
-	// r := image.Rect(50, 50, 500, 500)
-	// img, err := screenshot.CaptureRect(r)
-
-	f1, err := os.Open("./2.png")
-	if err != nil {
-		panic(err)
-	}
-	defer f1.Close()
-	origin, _, err := image.Decode(f1)
-	if err != nil {
-		panic(err)
-	}
-	img := origin.(*image.RGBA)
-	subImg := img.SubImage(image.Rect(startX, startY, startX+r*2, startY+r*2)).(*image.RGBA)
-	bounds := subImg.Bounds()
-	rx := 0
-	ry := 0
-	fmt.Println(bounds.Min.X, bounds.Max.X, bounds.Max.Y)
-b:
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		for x := bounds.Min.X; x <= bounds.Max.X; x++ {
-			r, g, b, _ := subImg.At(x, y).RGBA()
-			if rgbInterval(r, g, b) {
-				ry = y
-				rx = x
-				break b
-			}
+	hn := letsgo.GetHardwareNo()
+	config, err := parseConfig()
+	err = ui.Main(func() {
+		if hn == "" {
+			showError("无法获取机器码")
+			return
 		}
-	}
-	rx = rx - bounds.Min.X
-	ry = ry - bounds.Min.Y
-	fmt.Println(rx, ry)
-	if rx < 0 || ry < 0 {
-		return
-	}
-	angle := getAngle(r, r, rx, ry)
+		if err != nil {
+			showError("无法获取配置信息")
+			return
+		}
+		fmt.Println(config)
 
-	ratio := angle / 360.0
-	fmt.Println(ratio)
-	pressWaiting := roundTime * ratio
-	pressWaiting = pressWaiting * 1000 * 1000 * 1000
-	time.Sleep(time.Duration(pressWaiting) * time.Nanosecond)
-	f, err := os.Create("./ss.png")
+		window := ui.NewWindow("IG牛逼", 600, 280, true)
+		vbox := ui.NewVerticalBox()
 
+		vbox.SetPadded(true)
+
+		hbox := ui.NewHorizontalBox()
+		hbox.SetPadded(true)
+		vbox.Append(hbox, false)
+		vbox.Append(ui.NewLabel("机器号："+hn), false)
+		serialForm := ui.NewForm()
+		serialForm.SetPadded(true)
+		serialEntry := ui.NewEntry()
+		if config.Key != "" {
+			serialEntry.SetText(config.Key)
+		}
+		serialForm.Append("序列号", serialEntry, false)
+		hbox.Append(serialForm, false)
+
+		btnSer := ui.NewButton("设置序列号")
+		btnSer.OnClicked(func(*ui.Button) {
+			config.Key = serialEntry.Text()
+			err := saveConfig(config)
+			if err != nil {
+				ui.MsgBox(window, "错误", "设置序列号失败："+err.Error())
+			} else {
+				ui.MsgBox(window, "提示", "设置序列号成功")
+			}
+		})
+
+		hbox.Append(btnSer, false)
+		vbox.Append(ui.NewLabel("使用说明："), false)
+		vbox.Append(ui.NewLabel("1. 先设置屏幕分辨率为1920 x 1080"), false)
+		vbox.Append(ui.NewLabel("2. 游戏显示设置为全屏，中等画质，界面缩放1.0"), false)
+		vbox.Append(ui.NewLabel("3. 找一处有水的地方，进入钓鱼模式，装上鱼饵"), false)
+		vbox.Append(ui.NewLabel("4. 点击开始，在3秒内切换回游戏"), false)
+		vbox.Append(ui.NewLabel("5. 挂机别动鼠标键盘，别切换窗口，可关显示器。Enjoy!"), false)
+		btnStart := ui.NewButton("开始")
+		btnStart.OnClicked(func(*ui.Button) {
+			baes, err := letsgo.EncryptAES([]byte(hn), []byte(aeskey))
+			if err != nil {
+				ui.MsgBox(window, "错误", "序列号错误："+err.Error())
+			}
+			mySeria := hex.EncodeToString(baes)[7:17]
+			if mySeria == config.Key {
+				//TODO
+			} else {
+				ui.MsgBox(window, "错误", "序列号错误，请联系作者获取。")
+			}
+		})
+
+		vbox.Append(btnStart, false)
+
+		window.SetChild(vbox)
+
+		window.OnClosing(func(*ui.Window) bool {
+			ui.Quit()
+			return true
+		})
+		window.SetMargined(true)
+		window.Show()
+	})
 	if err != nil {
 		panic(err)
 	}
-	err = png.Encode(f, subImg)
+}
 
+func saveConfig(config *configeration) error {
+	jb, err := json.MarshalIndent(config, "", "	")
 	if err != nil {
-		panic(err)
+		return err
 	}
-	f.Close()
+	err = ioutil.WriteFile("config.ini", jb, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func rgbInterval(r, g, b uint32) bool {
-	return rmin <= int(r>>8) && int(r>>8) <= rmax && gmin <= int(g>>8) && int(g>>8) <= gmax && bmin <= int(b>>8) && int(b>>8) <= bmax
+func parseConfig() (*configeration, error) {
+	b, err := ioutil.ReadFile("config.ini")
+	if err != nil {
+		return nil, err
+	}
+	var con configeration
+	err = json.Unmarshal(b, &con)
+	if err != nil {
+		return nil, err
+	}
+	return &con, nil
 }
 
-func getAngle(x1, y1, x2, y2 int) float64 {
-	// 直角的边长
-	var x = float64(x1 - x2)
-	var y = float64(y1 - y2)
-	bearingRadians := math.Atan2(y, x)
-	bearingDegrees := bearingRadians * (180.0 / math.Pi)
-	if bearingDegrees <= 0 {
-		return 360.0 + bearingDegrees
-	}
-	return bearingDegrees - 90
+func showError(msg string) {
+	w := ui.NewWindow("错误", 100, 100, true)
+	v := ui.NewVerticalBox()
+	v.Append(ui.NewLabel(msg), false)
+	b := ui.NewButton("关闭")
+	v.Append(b, false)
+	b.OnClicked(func(*ui.Button) {
+		ui.Quit()
+	})
+	w.SetChild(v)
+	w.OnClosing(func(*ui.Window) bool {
+		ui.Quit()
+		return true
+	})
+	w.SetMargined(true)
+	w.Show()
 }
