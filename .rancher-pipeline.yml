@@ -1,0 +1,19 @@
+stages:
+- name: build
+  steps:
+  - runScriptConfig:
+      image: golang:1.11
+      shellScript: |-
+        mkdir -p /go/src
+        ln -s `pwd` /go/src/lingwei
+        cd /go/src/lingwei
+        go build -o lingwei main.go
+- name: publish
+  steps:
+  - publishImageConfig:
+      dockerfilePath: ./Dockerfile
+      buildContext: .
+      tag: lingwei
+      pushRemote: true
+      registry: dev.rancher.com:31117
+timeout: 60
