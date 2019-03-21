@@ -7,7 +7,7 @@ stages:
         mkdir -p /go/src
         ln -s `pwd` /go/src/lingwei
         cd /go/src/lingwei
-        go build -o lingwei main.go
+        CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -o lingwei main.go
 - name: publish
   steps:
   - publishImageConfig:
