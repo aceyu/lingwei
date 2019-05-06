@@ -18,20 +18,5 @@ stages:
       registry: dev.rancher.com:31117
     env:
       PLUGIN_DEBUG: "true"
-  - publishCatalogConfig:
-      path: ./charts/lingwei/latest
-      catalogTemplate: lingwei
-      version: latest
-      gitUrl: https://github.com/aceyu/charts.git
-      gitBranch: master
-      gitAuthor: zac
-      gitEmail: cydiay@gmail.com
-    envFrom:
-    - sourceName: github
-      sourceKey: USERNAME
-      targetKey: USERNAME
-    - sourceName: github
-      sourceKey: PASSWORD
-      targetKey: PASSWORD
 timeout: 60
 notification: {}
