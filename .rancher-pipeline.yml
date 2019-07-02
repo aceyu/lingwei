@@ -17,7 +17,7 @@ stages:
       tag: lingwei
       pushRemote: true
       registry: dev.rancher.com:31117
-      ftpname: lingwei
+      pushFileName: lingwei
     env:
       PLUGIN_DEBUG: "true"
 timeout: 60
