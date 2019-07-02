@@ -8,7 +8,6 @@ stages:
         ln -s `pwd` /go/src/lingwei
         cd /go/src/lingwei
         CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -o lingwei main.go
-        cat
 - name: publish
   steps:
   - publishImageConfig:
@@ -17,7 +16,6 @@ stages:
       tag: lingwei
       pushRemote: true
       registry: dev.rancher.com:31117
-      pushFileName: lingwei
     env:
       PLUGIN_DEBUG: "true"
 timeout: 60
