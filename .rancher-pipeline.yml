@@ -22,6 +22,6 @@ stages:
       targetNamespace: default
       workloadId: deployment:default:sshd
       port: "8080"
-      containerIndex: "1"
+      containerIndex: 1
 timeout: 60
 notification: {}
