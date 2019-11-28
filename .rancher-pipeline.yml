@@ -16,8 +16,12 @@ stages:
       tag: lingwei
       pushRemote: true
       registry: dev.rancher.com:31117
-      pushFilePath: lingwei
     env:
       PLUGIN_DEBUG: "true"
+  - deployConfig:
+      targetNamespace: default
+      workloadId: deployment:default:sshd
+      port: "8080"
+      containerIndex: "1"
 timeout: 60
 notification: {}
