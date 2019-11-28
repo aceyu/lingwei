@@ -17,10 +17,6 @@ stages:
       pushRemote: true
       registry: dev.rancher.com:31117
       callbackScript: /callbackscript/java.sh
-      targetNamespace: default
-      workloadId: deployment:default:sshd
-      port: "8080"
-      containerIndex: 1
     env:
       PLUGIN_DEBUG: "true"
 timeout: 60
