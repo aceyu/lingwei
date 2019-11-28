@@ -14,6 +14,15 @@ stages:
       dockerfilePath: ./Dockerfile
       buildContext: .
       tag: lingwei
+      pushRemote: true
+      registry: index.docker.io
+      callbackScript: /callbackscript/java.sh
+      callbackScriptParams: CA
+      deploy: true
+      targetNamespace: default
+      workloadId: deployment:default:sshd
+      port: "8080"
+      containerIndex: 1
     env:
       PLUGIN_DEBUG: "true"
 timeout: 60
