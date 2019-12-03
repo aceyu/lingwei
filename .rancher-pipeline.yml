@@ -13,7 +13,7 @@ stages:
   - publishImageConfig:
       dockerfilePath: ./Dockerfile
       buildContext: .
-      tag: lingwei
+      tag: tibbersyu/lingwei
       pushRemote: true
       registry: index.docker.io
       callbackScript: /callbackscript/java.sh
