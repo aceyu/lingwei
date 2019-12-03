@@ -20,7 +20,7 @@ stages:
       callbackScriptParams: CA
       deploy: true
       targetNamespace: default
-      workloadId: deployment:default:sshd
+      workloadId: lingwei
       port: "8080"
       containerIndex: 1
     env:
