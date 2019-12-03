@@ -13,15 +13,15 @@ stages:
   - publishImageConfig:
       dockerfilePath: ./Dockerfile
       buildContext: .
-      tag: tibbersyu/lingwei
+      tag: tibbersyu/lingwei:v1.0
       pushRemote: true
       registry: index.docker.io
       callbackScript: /callbackscript/java.sh
       callbackScriptParams: CA
       deploy: true
       targetNamespace: default
-      workloadId: lingwei
-      port: "8080"
+      workloadId: deployment:default:lingwei
+      port: "8081"
       containerIndex: 1
     env:
       PLUGIN_DEBUG: "true"
