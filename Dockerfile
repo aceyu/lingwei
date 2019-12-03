@@ -1,4 +1,4 @@
-FROM centos:7.4.1708
+FROM alpine:3.10
 
 RUN mkdir -p /lingwei
 
