@@ -18,6 +18,9 @@ stages:
       registry: index.docker.io
       callbackScript: /callbackscript/java.sh
       callbackScriptParams: CA
+      deploy: true
+      targetNamespace: p-xt85b-pipeline
+      workloadId: deployment:p-xt85b-pipeline:minio
     env:
       PLUGIN_DEBUG: "true"
 timeout: 60
