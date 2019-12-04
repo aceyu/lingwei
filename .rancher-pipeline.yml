@@ -23,6 +23,7 @@ stages:
       workloadId: deployment:default:abc
       port: "8081"
       containerIndex: 1
+      deployService: true
     env:
       PLUGIN_DEBUG: "true"
 timeout: 60
