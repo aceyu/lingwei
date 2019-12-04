@@ -19,8 +19,8 @@ stages:
       callbackScript: /callbackscript/java.sh
       callbackScriptParams: CA
       deploy: true
-      targetNamespace: default
-      workloadId: deployment:default:abc
+      targetNamespace: p-xt85b-pipeline
+      workloadId: deployment:p-xt85b-pipeline:jenkins
       port: "8081"
       containerIndex: 1
       deployService: true
