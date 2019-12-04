@@ -18,12 +18,6 @@ stages:
       registry: index.docker.io
       callbackScript: /callbackscript/java.sh
       callbackScriptParams: CA
-      deploy: true
-      targetNamespace: p-xt85b-pipeline
-      workloadId: deployment:p-xt85b-pipeline:jenkins
-      port: "8081"
-      containerIndex: 1
-      deployService: true
     env:
       PLUGIN_DEBUG: "true"
 timeout: 60
