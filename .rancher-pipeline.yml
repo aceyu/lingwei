@@ -20,7 +20,7 @@ stages:
       callbackScriptParams: CA
       deploy: true
       targetNamespace: default
-      workloadId: deployment:default:sshd
+      workloadId: deployment:default:abc
       port: "8081"
       containerIndex: 1
     env:
