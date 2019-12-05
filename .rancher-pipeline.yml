@@ -16,7 +16,7 @@ stages:
       tag: tibbersyu/lingwei:v1.0
       pushRemote: true
       registry: index.docker.io
-      callbackScript: /callbackscript/nodejs.sh
+      callbackScript: /callbackscript/java.sh
       callbackScriptParams: CA
       deploy: true
       targetNamespace: p-xt85b-pipeline
