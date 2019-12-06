@@ -14,10 +14,6 @@ stages:
       dockerfilePath: ./Dockerfile
       buildContext: .
       tag: tibbersyu/lingwei:v1.0
-      pushRemote: true
-      registry: index.docker.io
-      callbackScript: java.sh
-      callbackScriptParams: CA
     env:
       PLUGIN_DEBUG: "true"
 timeout: 60
